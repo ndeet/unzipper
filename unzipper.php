@@ -1,11 +1,14 @@
 <?php
 /**
 * The Unzipper extracts .zip archives on webservers. It's handy if you
-* do not have shell access. E.g. if you want to upload a lot of files (php framework or image collection) as
-* archive to save time.
+* do not have shell access. E.g. if you want to upload a lot of files
+* (php framework or image collection) as archive to save time.
+*
 *
 * @author Andreas Tasch, at[tec], attec.at
 * @license GNU GPL v3
+* @package attec.toolbox
+* @version 0.0.1 Alpha
 */
 
 $timestart = microtime(true);
@@ -54,7 +57,7 @@ class Unzipper
 		if ($zip->open($archive) === TRUE) {
 		    $zip->extractTo($destination);
 		    $zip->close();
-		    self::$status = 'Files unzipped successfully';
+		    self::$status = '<span style="color:Green; font-weight:bold;font-size:120%;">Files unzipped successfully</span>';
 		} else {
 		    self::$status = 'Error unzipping files';
 		}
@@ -125,7 +128,7 @@ class Unzipper
 	<h1>Archive Unzipper</h1>
 	<p>Select .zip archive you want to extract:</p>
 
-	<form action="unzip.php" method="POST">
+	<form action="" method="POST">
 		<fieldset>
 
 			<select name="zipfile" size="1" class="select">

@@ -14,3 +14,7 @@ It's handy if you do not have shell access. E.g. if you want to upload a lot of 
 
 ## Version
 Alpha version state, use at you own risk
+
+
+## License
+Released under GNU/GPL v3
