@@ -90,7 +90,7 @@ class Unzipper {
     if ($zip->open($archive) === TRUE) {
       // Check if destination is writable
       if(is_writeable($destination . '/')) {
-        $zip->extractTo($destination);
+        $zip->extractTo($destination . '/' . str_ireplace(".zip", "", $archive));
         $zip->close();
         self::$status = '<span style="color:green; font-weight:bold;font-size:120%;">Files unzipped successfully</span>';
       }
