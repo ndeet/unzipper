@@ -6,19 +6,20 @@ It's handy if you do not have shell access. E.g. if you want to upload a lot of 
 
 
 ## Requirements    
-PHP 5.3 and newer   
-(If you still run 5.2 or even 5.3 you should consider updating PHP. These old PHP versions do not get any security updates and your site may be vulnerable.)
+PHP 5.3 and newer
+(If you still run PHP < 5.6 you should consider updating PHP. These old PHP versions do not get any security updates and your site may be vulnerable.)
 
 
 ## Usage
 * Download unzipper.php and place it in the same directory as your .zip archive.
 * In Browser type URL to unzipper.php
 * Choose .zip archive you want to extract
+* Optionally select an extraction path, defaults to current directory
 * Click "Unzip Archive"
 
 
 ## Version
-Alpha version state, use at you own risk.
+Beta version state, use at you own risk.
 
 
 ## License
@@ -31,3 +32,7 @@ Released under GNU/GPL v3
 
 ## Updates    
 Get latest code at https://github.com/ndeet/unzipper
+
+
+## Credits   
+[See contributors on Github](https://github.com/ndeet/unzipper/graphs/contributors)  
