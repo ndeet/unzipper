@@ -40,7 +40,7 @@ class Unzipper {
         self::$status = '.zip or .gz files found, ready for extraction';
       }
       else {
-        self::$status = '<span style="color:red; font-weight:bold;font-size:120%;">Error: No .zip or .gz files found.</span>';
+        self::$status = '<span class="status--ERROR">Error: No .zip or .gz files found.</span>';
       }
     }
 
@@ -87,7 +87,7 @@ class Unzipper {
   public static function extractZipArchive($archive, $destination) {
     // Check if webserver supports unzipping.
     if (!class_exists('ZipArchive')) {
-      self::$status = '<span style="color:red; font-weight:bold;font-size:120%;">Error: Your PHP version does not support unzip functionality.</span>';
+      self::$status = '<span class="status--ERROR">Error: Your PHP version does not support unzip functionality.</span>';
       return;
     }
 
@@ -99,14 +99,14 @@ class Unzipper {
       if (is_writeable($destination . '/')) {
         $zip->extractTo($destination);
         $zip->close();
-        self::$status = '<span style="color:green; font-weight:bold;font-size:120%;">Files unzipped successfully</span>';
+        self::$status = '<span class="status--OK">Files unzipped successfully</span>';
       }
       else {
-        self::$status = '<span style="color:red; font-weight:bold;font-size:120%;">Error: Directory not writeable by webserver.</span>';
+        self::$status = '<span class="status--ERROR">Error: Directory not writeable by webserver.</span>';
       }
     }
     else {
-      self::$status = '<span style="color:red; font-weight:bold;font-size:120%;">Error: Cannot read .zip archive.</span>';
+      self::$status = '<span class="status--ERROR">Error: Cannot read .zip archive.</span>';
     }
   }
 
@@ -119,7 +119,7 @@ class Unzipper {
   public static function extractGzipFile($archive, $destination) {
     // Check if zlib is enabled
     if (!function_exists('gzopen')) {
-      self::$status = '<span style="color:red; font-weight:bold;font-size:120%;">Error: Your PHP has no zlib support enabled.</span>';
+      self::$status = '<span class="status--ERROR">Error: Your PHP has no zlib support enabled.</span>';
       return;
     }
 
@@ -135,10 +135,10 @@ class Unzipper {
 
     // Check if file was extracted.
     if (file_exists($destination . '/' . $filename)) {
-      self::$status = '<span style="color:green; font-weight:bold;font-size:120%;">File unzipped successfully.</span>';
+      self::$status = '<span class="status--OK">File unzipped successfully.</span>';
     }
     else {
-      self::$status = '<span style="color:red; font-weight:bold;font-size:120%;">Error unzipping file.</span>';
+      self::$status = '<span class="status--ERROR">Error unzipping file.</span>';
     }
 
   }
@@ -147,6 +147,7 @@ class Unzipper {
 ?>
 
 <!DOCTYPE html>
+<html>
 <head>
   <title>File Unzipper</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -157,8 +158,13 @@ class Unzipper {
       line-height: 150%;
     }
 
+    label {
+      display: block;
+      margin-top: 20px;
+    }
+
     fieldset {
-      border: 0px solid #000;
+      border: 0;
     }
 
     .select {
@@ -174,72 +180,62 @@ class Unzipper {
       border: 1px dotted #DDD;
     }
 
+    .status--ERROR {
+      color: red;
+      font-weight: bold;
+      font-size: 120%;
+    }
+
+    .status--OK {
+      color: green;
+      font-weight: bold;
+      font-size: 120%
+    }
+
     .form-field {
-      border: 2px solid black;
-      -webkit-border-radius: 10px;
-      -moz-border-radius: 10px;
-      border-radius: 10px;
-      -webkit-box-shadow: rgba(255, 255, 255, 0.4) 0 0px 0, inset rgba(000, 000, 000, 0.7) 0 0px 0px;
-      -moz-box-shadow: rgba(255, 255, 255, 0.4) 0 0px 0, inset rgba(000, 000, 000, 0.7) 0 0px 0px;
-      box-shadow: rgba(255, 255, 255, 0.4) 0 0px 0, inset rgba(000, 000, 000, 0.7) 0 0px 0px;
+      border: 1px solid #AAA;
       padding: 8px;
-      margin-bottom: 20px;
       width: 280px;
     }
 
+    .info {
+      margin-top: 0;
+      font-size: 80%;
+      color: #777;
+    }
+
     .submit {
-      -moz-box-shadow: inset 0px 1px 0px 0px #bbdaf7;
-      -webkit-box-shadow: inset 0px 1px 0px 0px #bbdaf7;
-      box-shadow: inset 0px 1px 0px 0px #bbdaf7;
-      background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #79bbff), color-stop(1, #378de5));
-      background: -moz-linear-gradient(center top, #79bbff 5%, #378de5 100%);
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#79bbff', endColorstr='#378de5');
-      background-color: #79bbff;
-      -moz-border-radius: 4px;
-      -webkit-border-radius: 4px;
-      border-radius: 4px;
-      border: 1px solid #84bbf3;
-      display: inline-block;
+      background-color: #378de5;
+      border: 0;
       color: #ffffff;
-      font-family: arial;
       font-size: 15px;
-      font-weight: bold;
       padding: 10px 24px;
+      margin: 20px 0 20px 0;
       text-decoration: none;
-      text-shadow: 1px 1px 0px #528ecc;
     }
 
     .submit:hover {
-      background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #378de5), color-stop(1, #79bbff));
-      background: -moz-linear-gradient(center top, #378de5 5%, #79bbff 100%);
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#378de5', endColorstr='#79bbff');
-      background-color: #378de5;
-    }
-
-    .submit:active {
-      position: relative;
-      top: 1px;
+      background-color: #2c6db2;
+      cursor: pointer;
     }
     -->
   </style>
 </head>
 <body>
 <h1>Archive Unzipper</h1>
-<p>Select .zip archive or .gz file you want to extract:</p>
 <form action="" method="POST">
   <fieldset>
+    <label for="zipfile">Select .zip archive or .gz file you want to extract:</label>
     <select name="zipfile" size="1" class="select">
       <?php foreach ($arc->zipfiles as $zip) {
         echo "<option>$zip</option>";
       }
       ?>
     </select>
-    <br/>
-    <br/>
+    <label for="extpath">Extraction path (optional):</label>
     <input type="text" name="extpath" class="form-field"
-           placeholder="extraction_path"/>
-    <label>Optional, if blank current dir will be used.</label>
-    <br/>
+           placeholder="mypath"/>
+    <p class="info">Enter extraction path without leading or trailing slashes (e.g. "mypath"). If left blank current directory will be used.</p>
     <input type="submit" name="submit" class="submit" value="Unzip Archive"/>
   </fieldset>
 </form>
