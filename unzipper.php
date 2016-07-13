@@ -46,18 +46,18 @@ class Unzipper {
 
     //check if an archive was selected for unzipping
     //check if archive has been selected
-    $input = '';
-    $input = strip_tags($_POST['zipfile']);
-    $destination = strip_tags($_POST['extpath']);
+    $input = isset($_POST['zipfile']) ? strip_tags($_POST['zipfile']) : '';
+    $destination = isset($_POST['extpath']) ? strip_tags($_POST['extpath']) : '';
     //allow only local existing archives to extract
     if ($input !== '') {
-      if(empty($destination)):
+      if(empty($destination)) {
                $extpath = $this->localdir;
-        else:
-            $extpath = $this->localdir . $destination;
-            if(!is_dir($extpath))
-                mkdir($extpath);
-        endif;
+        } else {
+            $extpath = $this->localdir . '/'. $destination;
+            if(!is_dir($extpath)) {
+              mkdir($extpath);
+            }
+        }
       if (in_array($input, $this->zipfiles)) {
         self::extract($input,$extpath);
       }
@@ -144,6 +144,7 @@ class Unzipper {
 }
 
 ?>
+
 <!DOCTYPE html>
 <head>
   <title>File Unzipper</title>
@@ -225,18 +226,16 @@ class Unzipper {
         ?>
       </select>
       <br />
-      <br/>
+      <br />
       <input type="text" name="extpath" class="form-field" placeholder="extraction_path" />
-      <label>Optional,if blank current dir will be used</label>
+      <label>Optional, if blank current dir will be used.</label>
       <br/>
       <input type="submit" name="submit" class="submit" value="Unzip Archive" />
     </fieldset>
   </form>
   <p class="status">
-    Status:
-    <?php echo $arc::$status; ?>
-    <br/> Processing Time:
-    <?php echo $time; ?> ms
+    Status: <?php echo $arc::$status; ?> <br />
+    Processing Time: <?php echo $time; ?> ms
   </p>
 </body>
 </html>
