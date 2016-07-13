@@ -227,7 +227,7 @@ class Unzipper {
       </select>
       <br />
       <br/>
-      <input type="text" name="extpath" class="form-field" placeholder="/extraction_path" />
+      <input type="text" name="extpath" class="form-field" placeholder="extraction_path" />
       <label>Optional,if blank current dir will be used</label>
       <br/>
       <input type="submit" name="submit" class="submit" value="Unzip Archive" />
