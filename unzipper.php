@@ -18,6 +18,9 @@ $arc = new Unzipper;
 $timeend = microtime(TRUE);
 $time = $timeend - $timestart;
 
+/**
+ * Class Unzipper
+ */
 class Unzipper {
   public $localdir = '.';
   public $zipfiles = array();
@@ -65,6 +68,12 @@ class Unzipper {
     }
   }
 
+  /**
+   * Checks file extension and calls suitable extractor functions.
+   *
+   * @param $archive
+   * @param $destination
+   */
   public static function extract($archive, $destination) {
     $ext = pathinfo($archive, PATHINFO_EXTENSION);
     if ($ext === 'zip') {
