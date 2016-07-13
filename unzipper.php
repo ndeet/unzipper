@@ -1,5 +1,4 @@
 <?php
-error_reporting(1);
 /**
  * The Unzipper extracts .zip archives and .gz files on webservers. It's handy if you
  * do not have shell access. E.g. if you want to upload a lot of files
@@ -58,7 +57,7 @@ class Unzipper {
             $extpath = $this->localdir . $destination;
             if(!is_dir($extpath))
                 mkdir($extpath);
-        endif;               
+        endif;
       if (in_array($input, $this->zipfiles)) {
         self::extract($input,$extpath);
       }
