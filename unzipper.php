@@ -32,7 +32,8 @@ class Unzipper {
     if ($dh = opendir($this->localdir)) {
       while (($file = readdir($dh)) !== FALSE) {
         if (pathinfo($file, PATHINFO_EXTENSION) === 'zip'
-          || pathinfo($file, PATHINFO_EXTENSION) === 'gz'
+          || pathinfo($file, PATHINFO_EXTENSION) === 'gz' 
+          || pathinfo($file, PATHINFO_EXTENSION) === 'rar' 
         ) {
           $this->zipfiles[] = $file;
         }
@@ -40,10 +41,10 @@ class Unzipper {
       closedir($dh);
 
       if (!empty($this->zipfiles)) {
-        self::$status = '.zip or .gz files found, ready for extraction';
+        self::$status = '.zip or .gz or .rar files found, ready for extraction';
       }
       else {
-        self::$status = '<span class="status--ERROR">Error: No .zip or .gz files found.</span>';
+        self::$status = '<span class="status--ERROR">Error: No .zip or .gz or rar files found.</span>';
       }
     }
 
@@ -76,15 +77,18 @@ class Unzipper {
    */
   public static function extract($archive, $destination) {
     $ext = pathinfo($archive, PATHINFO_EXTENSION);
-    if ($ext === 'zip') {
-      self::extractZipArchive($archive, $destination);
+    switch ($ext) {
+      case 'zip':
+        self::extractZipArchive($archive, $destination);
+        break;
+      case 'gz':
+       self::extractGzipFile($archive, $destination);
+        break;
+      case 'rar':
+       self::extractRarArchive($archive, $destination);  
+         break; 
     }
-    else {
-      if ($ext === 'gz') {
-        self::extractGzipFile($archive, $destination);
-      }
-    }
-
+    
   }
 
   /**
@@ -151,6 +155,39 @@ class Unzipper {
     }
 
   }
+
+  /**
+   * Decompress/extract a Rar archive using RarArchive.
+   *
+   * @param $archive
+   * @param $destination
+   */
+  public static function extractRarArchive($archive, $destination) {
+    // Check if webserver supports unzipping.
+    if (!class_exists('RarArchive')) {
+      self::$status = '<span class="status--ERROR">Error: Your PHP version does not support Rar functionality.<a class="info" href="http://php.net/manual/en/rar.installation.php">How to install RarArchive</a></span>';
+      return;
+    }
+    // Check if archive is readable.
+    if ($rar = RarArchive::open($archive)) {
+      // Check if destination is writable
+      if (is_writeable($destination . '/')) {
+          $entries = $rar->getEntries();
+           foreach ($entries as $entry) {
+              $entry->extract($destination);
+          }
+        $rar->close();
+        self::$status = '<span class="status--OK">Files extracted successfully</span>';
+      }
+      else {
+        self::$status = '<span class="status--ERROR">Error: Directory not writeable by webserver.</span>';
+      }
+    }
+    else {
+      self::$status = '<span class="status--ERROR">Error: Cannot read .rar archive.</span>';
+    }
+  }
+  
 }
 
 ?>
