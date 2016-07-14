@@ -271,7 +271,7 @@ class Unzipper {
 <h1>Archive Unzipper</h1>
 <form action="" method="POST">
   <fieldset>
-    <label for="zipfile">Select .zip archive or .gz file you want to extract:</label>
+    <label for="zipfile">Select .zip archive or .gz or .rar archive file you want to extract:</label>
     <select name="zipfile" size="1" class="select">
       <?php foreach ($arc->zipfiles as $zip) {
         echo "<option>$zip</option>";
