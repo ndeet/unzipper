@@ -1,6 +1,6 @@
 <?php
 /**
- * The Unzipper extracts .zip archives and .gz files on webservers. It's handy if you
+ * The Unzipper extracts .zip or .rar archives and .gz files on webservers. It's handy if you
  * do not have shell access. E.g. if you want to upload a lot of files
  * (php framework or image collection) as archive to save time.
  *
@@ -8,7 +8,7 @@
  * @author  Andreas Tasch, at[tec], attec.at
  * @license GNU GPL v3
  * @package attec.toolbox
- * @version 0.0.3 Beta
+ * @version 0.0.4 Beta
  */
 
 $timestart = microtime(TRUE);
@@ -165,7 +165,7 @@ class Unzipper {
   public static function extractRarArchive($archive, $destination) {
     // Check if webserver supports unzipping.
     if (!class_exists('RarArchive')) {
-      self::$status = '<span class="status--ERROR">Error: Your PHP version does not support Rar functionality.<a class="info" href="http://php.net/manual/en/rar.installation.php">How to install RarArchive</a></span>';
+      self::$status = '<span class="status--ERROR">Error: Your PHP version does not support .rar archive functionality. <a class="info" href="http://php.net/manual/en/rar.installation.php" target="_blank">How to install RarArchive</a></span>';
       return;
     }
     // Check if archive is readable.
@@ -271,7 +271,7 @@ class Unzipper {
 <h1>Archive Unzipper</h1>
 <form action="" method="POST">
   <fieldset>
-    <label for="zipfile">Select .zip archive or .gz or .rar archive file you want to extract:</label>
+    <label for="zipfile">Select .zip or .rar archive or .gz file you want to extract:</label>
     <select name="zipfile" size="1" class="select">
       <?php foreach ($arc->zipfiles as $zip) {
         echo "<option>$zip</option>";
