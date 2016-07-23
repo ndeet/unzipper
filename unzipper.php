@@ -23,7 +23,7 @@ if (isset($_POST['dounzip'])) {
   $unzipper->prepareExtraction($archive, $destination);
 }
 
-if(isset($_POST['dozip'])) {
+if (isset($_POST['dozip'])) {
   $zippath = !empty($_POST['zippath']) ? strip_tags($_POST['zippath']) : '.';
   // Resulting zipfile e.g. zipper--2016-07-23--11-55.zip
   $zipfile = 'zipper-' . date("Y-m-d--H-i") . '.zip';
@@ -46,8 +46,8 @@ class Unzipper {
     if ($dh = opendir($this->localdir)) {
       while (($file = readdir($dh)) !== FALSE) {
         if (pathinfo($file, PATHINFO_EXTENSION) === 'zip'
-          || pathinfo($file, PATHINFO_EXTENSION) === 'gz' 
-          || pathinfo($file, PATHINFO_EXTENSION) === 'rar' 
+          || pathinfo($file, PATHINFO_EXTENSION) === 'gz'
+          || pathinfo($file, PATHINFO_EXTENSION) === 'rar'
         ) {
           $this->zipfiles[] = $file;
         }
@@ -100,13 +100,13 @@ class Unzipper {
         self::extractZipArchive($archive, $destination);
         break;
       case 'gz':
-       self::extractGzipFile($archive, $destination);
+        self::extractGzipFile($archive, $destination);
         break;
       case 'rar':
-       self::extractRarArchive($archive, $destination);  
-         break; 
+        self::extractRarArchive($archive, $destination);
+        break;
     }
-    
+
   }
 
   /**
@@ -190,10 +190,10 @@ class Unzipper {
     if ($rar = RarArchive::open($archive)) {
       // Check if destination is writable
       if (is_writeable($destination . '/')) {
-          $entries = $rar->getEntries();
-           foreach ($entries as $entry) {
-              $entry->extract($destination);
-          }
+        $entries = $rar->getEntries();
+        foreach ($entries as $entry) {
+          $entry->extract($destination);
+        }
         $rar->close();
         $GLOBALS['status'] = array('success' => 'Files extracted successfully.');
       }
@@ -205,7 +205,7 @@ class Unzipper {
       $GLOBALS['status'] = array('error' => 'Error: Cannot read .rar archive.');
     }
   }
-  
+
 }
 
 /**
@@ -214,24 +214,23 @@ class Unzipper {
  * Copied and slightly modified from http://at2.php.net/manual/en/class.ziparchive.php#110719
  * @author umbalaconmeogia
  */
-class Zipper
-{
+class Zipper {
   /**
    * Add files and sub-directories in a folder to zip file.
    *
-   * @param string $folder
+   * @param string     $folder
    *   Path to folder that should be zipped.
    *
    * @param ZipArchive $zipFile
    *   Zipfile where files end up.
    *
-   * @param int $exclusiveLength
+   * @param int        $exclusiveLength
    *   Number of text to be exclusived from the file path.
    */
   private static function folderToZip($folder, &$zipFile, $exclusiveLength) {
     $handle = opendir($folder);
 
-    while (false !== $f = readdir($handle)) {
+    while (FALSE !== $f = readdir($handle)) {
       // Check for local/parent path or zipping file itself and skip.
       if ($f != '.' && $f != '..' && $f != basename(__FILE__)) {
         $filePath = "$folder/$f";
@@ -240,7 +239,8 @@ class Zipper
 
         if (is_file($filePath)) {
           $zipFile->addFile($filePath, $localPath);
-        } elseif (is_dir($filePath)) {
+        }
+        elseif (is_dir($filePath)) {
           // Add sub-directory.
           $zipFile->addEmptyDir($localPath);
           self::folderToZip($filePath, $zipFile, $exclusiveLength);
@@ -261,8 +261,7 @@ class Zipper
    * @param string $outZipPath
    *   Relative path of the resulting output zip file.
    */
-  public static function zipDir($sourcePath, $outZipPath)
-  {
+  public static function zipDir($sourcePath, $outZipPath) {
     $pathInfo = pathinfo($sourcePath);
     $parentPath = $pathInfo['dirname'];
     $dirName = $pathInfo['basename'];
@@ -272,7 +271,8 @@ class Zipper
     $z->addEmptyDir($dirName);
     if ($sourcePath == $dirName) {
       self::folderToZip($sourcePath, $z, 0);
-    } else {
+    }
+    else {
       self::folderToZip($sourcePath, $z, strlen("$parentPath/"));
     }
     $z->close();
