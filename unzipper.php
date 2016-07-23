@@ -15,12 +15,12 @@ define('VERSION', '0.1.0');
 $timestart = microtime(TRUE);
 $GLOBALS['status'] = array();
 
-$arc = new Unzipper;
+$unzipper = new Unzipper;
 if (isset($_POST['dounzip'])) {
   //check if an archive was selected for unzipping
   $archive = isset($_POST['zipfile']) ? strip_tags($_POST['zipfile']) : '';
   $destination = isset($_POST['extpath']) ? strip_tags($_POST['extpath']) : '';
-  $arc->prepareExtraction($archive, $destination);
+  $unzipper->prepareExtraction($archive, $destination);
 }
 
 if(isset($_POST['dozip'])) {
@@ -39,7 +39,6 @@ $time = $timeend - $timestart;
 class Unzipper {
   public $localdir = '.';
   public $zipfiles = array();
-  public static $status = '';
 
   public function __construct() {
 
@@ -64,6 +63,12 @@ class Unzipper {
     }
   }
 
+  /**
+   * Prepare and check zipfile for extraction.
+   *
+   * @param $archive
+   * @param $destination
+   */
   public function prepareExtraction($archive, $destination) {
     // Determine paths.
     if (empty($destination)) {
@@ -213,9 +218,15 @@ class Zipper
 {
   /**
    * Add files and sub-directories in a folder to zip file.
+   *
    * @param string $folder
+   *   Path to folder that should be zipped.
+   *
    * @param ZipArchive $zipFile
-   * @param int $exclusiveLength Number of text to be exclusived from the file path.
+   *   Zipfile where files end up.
+   *
+   * @param int $exclusiveLength
+   *   Number of text to be exclusived from the file path.
    */
   private static function folderToZip($folder, &$zipFile, $exclusiveLength) {
     $handle = opendir($folder);
@@ -240,7 +251,7 @@ class Zipper
   }
 
   /**
-   * Zip a folder (include itself).
+   * Zip a folder (including itself).
    * Usage:
    *   Zipper::zipDir('path/to/sourceDir', 'path/to/out.zip');
    *
@@ -269,11 +280,6 @@ class Zipper
     $GLOBALS['status'] = array('success' => 'Successfully created archive ' . $outZipPath);
   }
 }
-
-class Status {
-  public static $messages = array();
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -374,14 +380,13 @@ class Status {
     <h1>Archive Unzipper</h1>
     <label for="zipfile">Select .zip or .rar archive or .gz file you want to extract:</label>
     <select name="zipfile" size="1" class="select">
-      <?php foreach ($arc->zipfiles as $zip) {
+      <?php foreach ($unzipper->zipfiles as $zip) {
         echo "<option>$zip</option>";
       }
       ?>
     </select>
     <label for="extpath">Extraction path (optional):</label>
-    <input type="text" name="extpath" class="form-field"
-           placeholder="mypath"/>
+    <input type="text" name="extpath" class="form-field" />
     <p class="info">Enter extraction path without leading or trailing slashes (e.g. "mypath"). If left empty current directory will be used.</p>
     <input type="submit" name="dounzip" class="submit" value="Unzip Archive"/>
   </fieldset>
@@ -389,8 +394,7 @@ class Status {
   <fieldset>
     <h1>Archive Zipper</h1>
     <label for="zippath">Path that should be zipped (optional):</label>
-    <input type="text" name="zippath" class="form-field"
-           placeholder="zippath"/>
+    <input type="text" name="zippath" class="form-field" />
     <p class="info">Enter path to be zipped without leading or trailing slashes (e.g. "zippath"). If left empty current directory will be used.</p>
     <input type="submit" name="dozip" class="submit" value="Zip Archive"/>
   </fieldset>
