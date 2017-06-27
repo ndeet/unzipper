@@ -308,7 +308,6 @@ class Zipper {
       font-family: Arial, sans-serif;
       line-height: 150%;
       width:50%;
-      --main-primary-color:dodgerblue;
       background-color:#eee;
     }
 
@@ -353,7 +352,7 @@ class Zipper {
       padding: 10px;
       font-size: 80%;
       background: #FFF;
-      box-shadow: 0 -2px 1px var(--main-primary-color);
+      box-shadow: 0 -2px 1px dodgerblue;
 
       position:fixed;
       z-index:100;
@@ -383,7 +382,7 @@ class Zipper {
     }
 
     .status--SUCCESS {
-      background-color: var(--main-primary-color);
+      background-color: dodgerblue;
       font-weight: bold;
       color: white;
       font-size: 100%;
@@ -414,7 +413,7 @@ class Zipper {
     }
 
     .submit {
-      background-color: var(--main-primary-color);
+      background-color: dodgerblue;
       border: 0;
       color: #ffffff;
       font-size: 15px;
@@ -423,14 +422,14 @@ class Zipper {
       margin: 20px 0 20px 0;
       text-decoration: none;
       font-weight:bold;
-      border:solid 2px var(--main-primary-color);
+      border:solid 2px dodgerblue;
       box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 
       transition: background-color 1s, color 1s, box-shadow 1s;
     }
 
     .submit:hover {
-      color: var(--main-primary-color);
+      color: dodgerblue;
       background-color: #fff;
       cursor: pointer;
       box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
@@ -448,7 +447,7 @@ class Zipper {
     textarea:focus,
     button:focus {
         outline: none;
-        border-color:var(--main-primary-color);
+        border-color:dodgerblue;
         border-width:1.5px;
 
         transition: border 500ms;
@@ -476,7 +475,7 @@ class Zipper {
     {
       text-transform:uppercase;
       font-size:15px;
-      color:var(--main-primary-color)
+      color:dodgerblue
     }
 
 
@@ -508,7 +507,7 @@ class Zipper {
 
         animation: statusAnimation 1s;  
 
-        border:solid 2px var(--main-primary-color);   
+        border:solid 2px dodgerblue;   
 
         transition: width 500ms;
       }
