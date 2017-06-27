@@ -534,8 +534,13 @@ class Zipper {
       <h1>Archive Unzipper</h1>
       <label for="zipfile">Select .zip or .rar archive or .gz file you want to extract:</label>
       <select name="zipfile" size="1" class="select">
-        <?php foreach ($unzipper->zipfiles as $zip) {
-          echo "<option>$zip</option>";
+        <?php if (!empty($unzipper->zipfiles)) { ?>
+          <?php foreach ($unzipper->zipfiles as $zip) {
+            echo "<option>$zip</option>";
+          }
+        }else{
+          ?><option value="" disabled selected>No archives found</option>
+          <?php
         }
         ?>
       </select>
