@@ -33,6 +33,31 @@ if (isset($_POST['dozip'])) {
 $timeend = microtime(TRUE);
 $time = $timeend - $timestart;
 
+function scanFiles($localdir)
+{
+   $result = array();
+
+   foreach (scandir($localdir) as $file)
+   {
+      if ($file != "." && $file != ".."){
+        $filename = $localdir . "/" . $file;
+
+        if (is_dir($filename))
+          $result = array_merge($result, scanFiles($filename));
+        else
+        {
+          if (pathinfo($filename, PATHINFO_EXTENSION) === 'zip'
+            || pathinfo($filename, PATHINFO_EXTENSION) === 'gz'
+            || pathinfo($filename, PATHINFO_EXTENSION) === 'rar')
+          {
+            $result[] = $filename;
+          }
+        }
+      }
+   }
+
+   return $result;
+}
 /**
  * Class Unzipper
  */
@@ -41,18 +66,8 @@ class Unzipper {
   public $zipfiles = array();
 
   public function __construct() {
-
-    //read directory and pick .zip and .gz files
-    if ($dh = opendir($this->localdir)) {
-      while (($file = readdir($dh)) !== FALSE) {
-        if (pathinfo($file, PATHINFO_EXTENSION) === 'zip'
-          || pathinfo($file, PATHINFO_EXTENSION) === 'gz'
-          || pathinfo($file, PATHINFO_EXTENSION) === 'rar'
-        ) {
-          $this->zipfiles[] = $file;
-        }
-      }
-      closedir($dh);
+    
+      $this->zipfiles = scanFiles($this->localdir);
 
       if (!empty($this->zipfiles)) {
         $GLOBALS['status'] = array('info' => '.zip or .gz or .rar files found, ready for extraction');
@@ -60,7 +75,7 @@ class Unzipper {
       else {
         $GLOBALS['status'] = array('info' => 'No .zip or .gz or rar files found. So only zipping functionality available.');
       }
-    }
+    
   }
 
   /**
