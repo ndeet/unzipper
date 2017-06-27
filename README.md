@@ -12,7 +12,7 @@ PHP 5.3 and newer
 
 
 ## Usage
-* Download unzipper.php and place it in the same directory as your .zip archive.
+* Download unzipper.php and place it in the same directory as your .zip archive or place it in the root directory as unzipper.php file can scan all the directores in a filesystem.
 * In Browser type URL to unzipper.php
 
 ### Archive unzipper
@@ -32,8 +32,8 @@ Beta version state, use at you own risk.
 Released under GNU/GPL v3
 
 
-## Screenshot   
-![Screenshot of unzipper](https://cloud.githubusercontent.com/assets/1136761/17080297/1bccbd60-512a-11e6-89cb-c6c112270154.png)
+## Screenshot
+![Screenshot of unzipper newer version](https://raw.githubusercontent.com/Chamuth/unzipper/master/images/unzipperscreenshot.png)
 
 
 ## Updates    
