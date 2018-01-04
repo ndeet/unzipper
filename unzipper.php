@@ -8,16 +8,16 @@
  * @author  Andreas Tasch, at[tec], attec.at
  * @license GNU GPL v3
  * @package attec.toolbox
- * @version 0.1.0
+ * @version 0.1.1
  */
-define('VERSION', '0.1.0');
+define('VERSION', '0.1.1');
 
 $timestart = microtime(TRUE);
 $GLOBALS['status'] = array();
 
 $unzipper = new Unzipper;
 if (isset($_POST['dounzip'])) {
-  //check if an archive was selected for unzipping
+  // Check if an archive was selected for unzipping.
   $archive = isset($_POST['zipfile']) ? strip_tags($_POST['zipfile']) : '';
   $destination = isset($_POST['extpath']) ? strip_tags($_POST['extpath']) : '';
   $unzipper->prepareExtraction($archive, $destination);
@@ -25,13 +25,13 @@ if (isset($_POST['dounzip'])) {
 
 if (isset($_POST['dozip'])) {
   $zippath = !empty($_POST['zippath']) ? strip_tags($_POST['zippath']) : '.';
-  // Resulting zipfile e.g. zipper--2016-07-23--11-55.zip
+  // Resulting zipfile e.g. zipper--2016-07-23--11-55.zip.
   $zipfile = 'zipper-' . date("Y-m-d--H-i") . '.zip';
   Zipper::zipDir($zippath, $zipfile);
 }
 
 $timeend = microtime(TRUE);
-$time = $timeend - $timestart;
+$time = round($timeend - $timestart, 4);
 
 /**
  * Class Unzipper
@@ -41,8 +41,7 @@ class Unzipper {
   public $zipfiles = array();
 
   public function __construct() {
-
-    //read directory and pick .zip and .gz files
+    // Read directory and pick .zip, .rar and .gz files.
     if ($dh = opendir($this->localdir)) {
       while (($file = readdir($dh)) !== FALSE) {
         if (pathinfo($file, PATHINFO_EXTENSION) === 'zip'
@@ -66,22 +65,24 @@ class Unzipper {
   /**
    * Prepare and check zipfile for extraction.
    *
-   * @param $archive
-   * @param $destination
+   * @param string $archive
+   *   The archive name including file extension. E.g. my_archive.zip.
+   * @param string $destination
+   *   The relative destination path where to extract files.
    */
-  public function prepareExtraction($archive, $destination) {
+  public function prepareExtraction($archive, $destination = '') {
     // Determine paths.
     if (empty($destination)) {
       $extpath = $this->localdir;
     }
     else {
       $extpath = $this->localdir . '/' . $destination;
-      // todo move this to extraction function
+      // Todo: move this to extraction function.
       if (!is_dir($extpath)) {
         mkdir($extpath);
       }
     }
-    //allow only local existing archives to extract
+    // Only local existing archives are allowed to be extracted.
     if (in_array($archive, $this->zipfiles)) {
       self::extract($archive, $extpath);
     }
@@ -90,8 +91,10 @@ class Unzipper {
   /**
    * Checks file extension and calls suitable extractor functions.
    *
-   * @param $archive
-   * @param $destination
+   * @param string $archive
+   *   The archive name including file extension. E.g. my_archive.zip.
+   * @param string $destination
+   *   The relative destination path where to extract files.
    */
   public static function extract($archive, $destination) {
     $ext = pathinfo($archive, PATHINFO_EXTENSION);
@@ -144,8 +147,10 @@ class Unzipper {
   /**
    * Decompress a .gz File.
    *
-   * @param $archive
-   * @param $destination
+   * @param string $archive
+   *   The archive name including file extension. E.g. my_archive.zip.
+   * @param string $destination
+   *   The relative destination path where to extract files.
    */
   public static function extractGzipFile($archive, $destination) {
     // Check if zlib is enabled
@@ -177,8 +182,10 @@ class Unzipper {
   /**
    * Decompress/extract a Rar archive using RarArchive.
    *
-   * @param $archive
-   * @param $destination
+   * @param string $archive
+   *   The archive name including file extension. E.g. my_archive.zip.
+   * @param string $destination
+   *   The relative destination path where to extract files.
    */
   public static function extractRarArchive($archive, $destination) {
     // Check if webserver supports unzipping.
@@ -218,13 +225,13 @@ class Zipper {
   /**
    * Add files and sub-directories in a folder to zip file.
    *
-   * @param string     $folder
+   * @param string $folder
    *   Path to folder that should be zipped.
    *
    * @param ZipArchive $zipFile
    *   Zipfile where files end up.
    *
-   * @param int        $exclusiveLength
+   * @param int $exclusiveLength
    *   Number of text to be exclusived from the file path.
    */
   private static function folderToZip($folder, &$zipFile, $exclusiveLength) {
@@ -252,6 +259,7 @@ class Zipper {
 
   /**
    * Zip a folder (including itself).
+   *
    * Usage:
    *   Zipper::zipDir('path/to/sourceDir', 'path/to/out.zip');
    *
