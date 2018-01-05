@@ -161,7 +161,7 @@ class Unzipper {
 
     $filename = pathinfo($archive, PATHINFO_FILENAME);
     $gzipped = gzopen($archive, "rb");
-    $file = fopen($filename, "w");
+    $file = fopen($destination . '/' . $filename, "w");
 
     while ($string = gzread($gzipped, 4096)) {
       fwrite($file, $string, strlen($string));
@@ -172,6 +172,16 @@ class Unzipper {
     // Check if file was extracted.
     if (file_exists($destination . '/' . $filename)) {
       $GLOBALS['status'] = array('success' => 'File unzipped successfully.');
+
+      // If we had a tar.gz file, let's extract that tar file.
+      if (pathinfo($destination . '/' . $filename, PATHINFO_EXTENSION) == 'tar') {
+        $phar = new PharData($destination . '/' . $filename);
+        if ($phar->extractTo($destination)) {
+          $GLOBALS['status'] = array('success' => 'Extracted tar.gz archive successfully.');
+          // Delete .tar.
+          unlink($destination . '/' . $filename);
+        }
+      }
     }
     else {
       $GLOBALS['status'] = array('error' => 'Error unzipping file.');
