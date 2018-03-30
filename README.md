@@ -6,10 +6,13 @@ As of version 0.1.0 it also supports creating archives.
 It's handy if you do not have shell access. E.g. if you want to upload a lot of files (php framework or image collection) as archive - because it is much faster than uploading each file by itself.
 
 
-## Requirements    
+## Requirements
 PHP 5.3 and newer
 (If you still run PHP < 5.6 you should consider updating PHP. These old PHP versions do not get any security updates and your site may be vulnerable.)
 
+## Security
+* Don't leave utility on production server. It can easily be used to extract sensitive information (like configuration files with login/password to your database server). Delete it right after usage.
+* To prevent unauthorized access to script, it's password-protected. Default login/password is Rainbow/Dash (case-sensitive). Change constants VALID_USER and VALID_PASSWORD to make your own password.
 
 ## Usage
 * Download unzipper.php and place it in the same directory as your .zip archive.
@@ -32,13 +35,13 @@ Beta version state, use at you own risk.
 Released under GNU/GPL v3
 
 
-## Screenshot   
+## Screenshot
 ![Screenshot of unzipper](https://cloud.githubusercontent.com/assets/1136761/17080297/1bccbd60-512a-11e6-89cb-c6c112270154.png)
 
 
-## Updates    
+## Updates
 Get latest code at https://github.com/ndeet/unzipper
 
 
-## Credits   
-[See contributors on Github](https://github.com/ndeet/unzipper/graphs/contributors)  
+## Credits
+[See contributors on Github](https://github.com/ndeet/unzipper/graphs/contributors)
