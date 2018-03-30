@@ -8,12 +8,34 @@
  * @author  Andreas Tasch, at[tec], attec.at
  * @license GNU GPL v3
  * @package attec.toolbox
- * @version 0.1.1
+ * @version 0.1.2
  */
-define('VERSION', '0.1.1');
+define('VERSION', '0.1.2');
+define('VALID_USER','Rainbow');
+define('VALID_PASSWORD','Dash');
+
+if (!isset($_SERVER['PHP_AUTH_USER'])) {
+  header('WWW-Authenticate: Basic realm="This utility is password-protected"');
+  header('HTTP/1.0 401 Unauthorized');
+  echo 'This utility is password-protected';
+  exit;
+}else if (($_SERVER['PHP_AUTH_USER']!==VALID_USER) or
+  ($_SERVER['PHP_AUTH_PW']!==VALID_PASSWORD)) {
+  header('WWW-Authenticate: Basic realm="You entered invalid login|password"');
+  header('HTTP/1.0 401 Unauthorized');
+  echo 'You entered invalid login|password';
+  exit;
+}
 
 $timestart = microtime(TRUE);
 $GLOBALS['status'] = array();
+
+if (isset($_POST['dozip'])) {
+  $zippath = !empty($_POST['zippath']) ? strip_tags($_POST['zippath']) : '.';
+  // Resulting zipfile e.g. zipper--2016-07-23--11-55.zip.
+  $zipfile = 'zipper-' . date("Y-m-d--H-i") . '.zip';
+  Zipper::zipDir($zippath, $zipfile);
+}
 
 $unzipper = new Unzipper;
 if (isset($_POST['dounzip'])) {
@@ -21,13 +43,6 @@ if (isset($_POST['dounzip'])) {
   $archive = isset($_POST['zipfile']) ? strip_tags($_POST['zipfile']) : '';
   $destination = isset($_POST['extpath']) ? strip_tags($_POST['extpath']) : '';
   $unzipper->prepareExtraction($archive, $destination);
-}
-
-if (isset($_POST['dozip'])) {
-  $zippath = !empty($_POST['zippath']) ? strip_tags($_POST['zippath']) : '.';
-  // Resulting zipfile e.g. zipper--2016-07-23--11-55.zip.
-  $zipfile = 'zipper-' . date("Y-m-d--H-i") . '.zip';
-  Zipper::zipDir($zippath, $zipfile);
 }
 
 $timeend = microtime(TRUE);
@@ -54,10 +69,10 @@ class Unzipper {
       closedir($dh);
 
       if (!empty($this->zipfiles)) {
-        $GLOBALS['status'] = array('info' => '.zip or .gz or .rar files found, ready for extraction');
+        $GLOBALS['status'][] = array('info' => '.zip or .gz or .rar files found, ready for extraction');
       }
       else {
-        $GLOBALS['status'] = array('info' => 'No .zip or .gz or rar files found. So only zipping functionality available.');
+        $GLOBALS['status'][] = array('info' => 'No .zip or .gz or rar files found. So only zipping functionality available.');
       }
     }
   }
@@ -121,7 +136,7 @@ class Unzipper {
   public static function extractZipArchive($archive, $destination) {
     // Check if webserver supports unzipping.
     if (!class_exists('ZipArchive')) {
-      $GLOBALS['status'] = array('error' => 'Error: Your PHP version does not support unzip functionality.');
+      $GLOBALS['status'][] = array('error' => 'Error: Your PHP version does not support unzip functionality.');
       return;
     }
 
@@ -133,14 +148,14 @@ class Unzipper {
       if (is_writeable($destination . '/')) {
         $zip->extractTo($destination);
         $zip->close();
-        $GLOBALS['status'] = array('success' => 'Files unzipped successfully');
+        $GLOBALS['status'][] = array('success' => 'Files unzipped successfully');
       }
       else {
-        $GLOBALS['status'] = array('error' => 'Error: Directory not writeable by webserver.');
+        $GLOBALS['status'][] = array('error' => 'Error: Directory not writeable by webserver.');
       }
     }
     else {
-      $GLOBALS['status'] = array('error' => 'Error: Cannot read .zip archive.');
+      $GLOBALS['status'][] = array('error' => 'Error: Cannot read .zip archive.');
     }
   }
 
@@ -155,7 +170,7 @@ class Unzipper {
   public static function extractGzipFile($archive, $destination) {
     // Check if zlib is enabled
     if (!function_exists('gzopen')) {
-      $GLOBALS['status'] = array('error' => 'Error: Your PHP has no zlib support enabled.');
+      $GLOBALS['status'][] = array('error' => 'Error: Your PHP has no zlib support enabled.');
       return;
     }
 
@@ -171,20 +186,20 @@ class Unzipper {
 
     // Check if file was extracted.
     if (file_exists($destination . '/' . $filename)) {
-      $GLOBALS['status'] = array('success' => 'File unzipped successfully.');
+      $GLOBALS['status'][] = array('success' => 'File unzipped successfully.');
 
       // If we had a tar.gz file, let's extract that tar file.
       if (pathinfo($destination . '/' . $filename, PATHINFO_EXTENSION) == 'tar') {
         $phar = new PharData($destination . '/' . $filename);
         if ($phar->extractTo($destination)) {
-          $GLOBALS['status'] = array('success' => 'Extracted tar.gz archive successfully.');
+          $GLOBALS['status'][] = array('success' => 'Extracted tar.gz archive successfully.');
           // Delete .tar.
           unlink($destination . '/' . $filename);
         }
       }
     }
     else {
-      $GLOBALS['status'] = array('error' => 'Error unzipping file.');
+      $GLOBALS['status'][] = array('error' => 'Error unzipping file.');
     }
 
   }
@@ -200,7 +215,7 @@ class Unzipper {
   public static function extractRarArchive($archive, $destination) {
     // Check if webserver supports unzipping.
     if (!class_exists('RarArchive')) {
-      $GLOBALS['status'] = array('error' => 'Error: Your PHP version does not support .rar archive functionality. <a class="info" href="http://php.net/manual/en/rar.installation.php" target="_blank">How to install RarArchive</a>');
+      $GLOBALS['status'][] = array('error' => 'Error: Your PHP version does not support .rar archive functionality. <a class="info" href="http://php.net/manual/en/rar.installation.php" target="_blank">How to install RarArchive</a>');
       return;
     }
     // Check if archive is readable.
@@ -212,14 +227,14 @@ class Unzipper {
           $entry->extract($destination);
         }
         $rar->close();
-        $GLOBALS['status'] = array('success' => 'Files extracted successfully.');
+        $GLOBALS['status'][] = array('success' => 'Files extracted successfully.');
       }
       else {
-        $GLOBALS['status'] = array('error' => 'Error: Directory not writeable by webserver.');
+        $GLOBALS['status'][] = array('error' => 'Error: Directory not writeable by webserver.');
       }
     }
     else {
-      $GLOBALS['status'] = array('error' => 'Error: Cannot read .rar archive.');
+      $GLOBALS['status'][] = array('error' => 'Error: Cannot read .rar archive.');
     }
   }
 
@@ -295,7 +310,7 @@ class Zipper {
     }
     $z->close();
 
-    $GLOBALS['status'] = array('success' => 'Successfully created archive ' . $outZipPath);
+    $GLOBALS['status'][] = array('success' => 'Successfully created archive ' . $outZipPath);
   }
 }
 ?>
@@ -389,11 +404,20 @@ class Zipper {
   </style>
 </head>
 <body>
-<p class="status status--<?php echo strtoupper(key($GLOBALS['status'])); ?>">
-  Status: <?php echo reset($GLOBALS['status']); ?><br/>
+<?php foreach($GLOBALS['status'] as $value):
+  // this is a fastest approach to get first key and value
+  // https://stackoverflow.com/questions/1028668/get-first-key-in-a-possibly-associative-array
+  foreach($value as $status=>$description) break;
+?><p class="status status--<?php echo strtoupper($status); ?>">
+  Status: <?php echo $description; ?><br/>
+  <?php if(($status!=='info') and($time>0)): ?>
   <span class="small">Processing Time: <?php echo $time; ?> seconds</span>
+  <?php endif ?>
 </p>
+<?php endforeach ?>
+
 <form action="" method="POST">
+  <?php if(count($unzipper->zipfiles)>0): ?>
   <fieldset>
     <h1>Archive Unzipper</h1>
     <label for="zipfile">Select .zip or .rar archive or .gz file you want to extract:</label>
@@ -408,6 +432,7 @@ class Zipper {
     <p class="info">Enter extraction path without leading or trailing slashes (e.g. "mypath"). If left empty current directory will be used.</p>
     <input type="submit" name="dounzip" class="submit" value="Unzip Archive"/>
   </fieldset>
+  <?php endif ?>
 
   <fieldset>
     <h1>Archive Zipper</h1>
