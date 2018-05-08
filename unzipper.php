@@ -299,7 +299,7 @@ class Zipper {
   }
 }
 ?>
-
+<?php echo ""; /** Somewhy GoDaddy returns ERR_EMPTY_RESPONSE without this. */ ?>
 <!DOCTYPE html>
 <html>
 <head>
