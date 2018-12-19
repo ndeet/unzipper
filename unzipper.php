@@ -53,6 +53,31 @@ class Unzipper {
       }
       closedir($dh);
 
+       if ($ignoreFile = fopen('ignore.txt', 'r')) {
+        $ignores =[];
+        $matchZips = [];
+        while (!feof($ignoreFile)) {
+          $ignore = trim(fgets($ignoreFile));
+          if ($ignore && $ignore[0] =='#') {
+            continue;
+          }
+          array_push($ignores, str_replace(" ", "", $ignore));
+          foreach ($this->zipfiles as $zipfile) {
+            if (fnmatch(trim($ignore), $zipfile)) {
+              array_push($matchZips, $zipfile);
+            }
+          }
+            
+        }
+        $matchZips = array_unique(array_merge($ignores,$matchZips));
+        fclose($ignoreFile);
+
+        
+
+      }
+
+      $this->zipfiles = array_unique(array_diff($this->zipfiles, $matchZips));
+
       if (!empty($this->zipfiles)) {
         $GLOBALS['status'] = array('info' => '.zip or .gz or .rar files found, ready for extraction');
       }
