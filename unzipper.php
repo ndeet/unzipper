@@ -69,8 +69,10 @@ class Unzipper {
    *   The archive name including file extension. E.g. my_archive.zip.
    * @param string $destination
    *   The relative destination path where to extract files.
+   * @param boolean $exclude_leading_dir
+   *   If true, check for a leading directory in the archive and exclude it in the extraction.
    */
-  public function prepareExtraction($archive, $destination = '') {
+  public function prepareExtraction($archive, $destination = '', $exclude_leading_dir = false) {
     // Determine paths.
     if (empty($destination)) {
       $extpath = $this->localdir;
@@ -84,7 +86,7 @@ class Unzipper {
     }
     // Only local existing archives are allowed to be extracted.
     if (in_array($archive, $this->zipfiles)) {
-      self::extract($archive, $extpath);
+      self::extract($archive, $extpath, $exclude_leading_dir);
     }
   }
 
@@ -95,18 +97,20 @@ class Unzipper {
    *   The archive name including file extension. E.g. my_archive.zip.
    * @param string $destination
    *   The relative destination path where to extract files.
+   * @param boolean $exclude_leading_dir
+   *   If true, check for a leading directory in the archive and exclude it in the extraction.
    */
-  public static function extract($archive, $destination) {
+  public static function extract($archive, $destination, $exclude_leading_dir) {
     $ext = pathinfo($archive, PATHINFO_EXTENSION);
     switch ($ext) {
       case 'zip':
-        self::extractZipArchive($archive, $destination);
+        self::extractZipArchive($archive, $destination, $exclude_leading_dir);
         break;
       case 'gz':
-        self::extractGzipFile($archive, $destination);
+        self::extractGzipFile($archive, $destination, $exclude_leading_dir);
         break;
       case 'rar':
-        self::extractRarArchive($archive, $destination);
+        self::extractRarArchive($archive, $destination, $exclude_leading_dir);
         break;
     }
 
@@ -119,8 +123,10 @@ class Unzipper {
    *   The archive name including file extension. E.g. my_archive.zip.
    * @param string $destination
    *   The relative destination path where to extract files.
+   * @param boolean $exclude_leading_dir
+   *   If true, check for a leading directory in the archive and exclude it in the extraction.
    */
-  public static function extractZipArchive($archive, $destination) {
+  public static function extractZipArchive($archive, $destination, $exclude_leading_dir) {
     // Check if webserver supports unzipping.
     if (!class_exists('ZipArchive')) {
       $GLOBALS['status'] = array('error' => 'Error: Your PHP version does not support unzip functionality.');
@@ -133,7 +139,18 @@ class Unzipper {
     if ($zip->open($archive) === TRUE) {
       // Check if destination is writable
       if (is_writeable($destination . '/')) {
-        $zip->extractTo($destination);
+        // Decide where to extract files
+        $exclude_leading_dir ? $extract_dir = self::createTmpDir()
+                             : $extract_dir = $destination;
+
+        $zip->extractTo($extract_dir);
+
+        // Check if leading dir should be excluded
+        if ($exclude_leading_dir) {
+          self::moveFilesExcludingLeadingDir($extract_dir, $destination);
+          rmdir($extract_dir);
+        }
+
         $zip->close();
         $GLOBALS['status'] = array('success' => 'Files unzipped successfully');
       }
@@ -153,8 +170,10 @@ class Unzipper {
    *   The archive name including file extension. E.g. my_archive.zip.
    * @param string $destination
    *   The relative destination path where to extract files.
+   * @param boolean $exclude_leading_dir
+   *   If true, check for a leading directory in the archive and exclude it in the extraction.
    */
-  public static function extractGzipFile($archive, $destination) {
+  public static function extractGzipFile($archive, $destination, $exclude_leading_dir) {
     // Check if zlib is enabled
     if (!function_exists('gzopen')) {
       $GLOBALS['status'] = array('error' => 'Error: Your PHP has no zlib support enabled.');
@@ -178,7 +197,16 @@ class Unzipper {
       // If we had a tar.gz file, let's extract that tar file.
       if (pathinfo($destination . '/' . $filename, PATHINFO_EXTENSION) == 'tar') {
         $phar = new PharData($destination . '/' . $filename);
-        if ($phar->extractTo($destination)) {
+
+        // Decide where to extract files
+        $exclude_leading_dir ? $extract_dir = self::createTmpDir()
+                             : $extract_dir = $destination;
+
+        if ($phar->extractTo($extract_dir)) {
+          if ($exclude_leading_dir) {
+            self::moveFilesExcludingLeadingDir($extract_dir, $destination);
+            rmdir($extract_dir);
+          }
           $GLOBALS['status'] = array('success' => 'Extracted tar.gz archive successfully.');
           // Delete .tar.
           unlink($destination . '/' . $filename);
@@ -198,8 +226,10 @@ class Unzipper {
    *   The archive name including file extension. E.g. my_archive.zip.
    * @param string $destination
    *   The relative destination path where to extract files.
+   * @param boolean $exclude_leading_dir
+   *   If true, check for a leading directory in the archive and exclude it in the extraction.
    */
-  public static function extractRarArchive($archive, $destination) {
+  public static function extractRarArchive($archive, $destination, $exclude_leading_dir) {
     // Check if webserver supports unzipping.
     if (!class_exists('RarArchive')) {
       $GLOBALS['status'] = array('error' => 'Error: Your PHP version does not support .rar archive functionality. <a class="info" href="http://php.net/manual/en/rar.installation.php" target="_blank">How to install RarArchive</a>');
@@ -209,10 +239,21 @@ class Unzipper {
     if ($rar = RarArchive::open($archive)) {
       // Check if destination is writable
       if (is_writeable($destination . '/')) {
+        // Decide where to extract files
+        $exclude_leading_dir ? $extract_dir = self::createTmpDir()
+                             : $extract_dir = $destination;
+
         $entries = $rar->getEntries();
         foreach ($entries as $entry) {
-          $entry->extract($destination);
+          $entry->extract($extract_dir);
         }
+
+        // Check if leading dir should be excluded
+        if ($exclude_leading_dir) {
+          self::moveFilesExcludingLeadingDir($extract_dir, $destination);
+          rmdir($extract_dir);
+        }
+
         $rar->close();
         $GLOBALS['status'] = array('success' => 'Files extracted successfully.');
       }
