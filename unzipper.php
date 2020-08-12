@@ -223,6 +223,22 @@ class Unzipper {
     }
   }
 
+  /**
+   * Create a temporary writable directory with a random name.
+   */
+  private static function createTmpDir() {
+    // Decide where to create temp directory
+    $dir = is_writeable('./') ? '.' : sys_get_temp_dir();
+
+    // Create a random temp directory name
+    do {
+      $tmp_dir = $dir.'/'.mt_rand();
+    }
+    while (!@mkdir($tmp_dir));
+
+    return $tmp_dir;
+  }
+
 }
 
 /**
