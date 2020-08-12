@@ -115,8 +115,10 @@ class Unzipper {
   /**
    * Decompress/extract a zip archive using ZipArchive.
    *
-   * @param $archive
-   * @param $destination
+   * @param string $archive
+   *   The archive name including file extension. E.g. my_archive.zip.
+   * @param string $destination
+   *   The relative destination path where to extract files.
    */
   public static function extractZipArchive($archive, $destination) {
     // Check if webserver supports unzipping.
