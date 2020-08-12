@@ -20,7 +20,8 @@ if (isset($_POST['dounzip'])) {
   // Check if an archive was selected for unzipping.
   $archive = isset($_POST['zipfile']) ? strip_tags($_POST['zipfile']) : '';
   $destination = isset($_POST['extpath']) ? strip_tags($_POST['extpath']) : '';
-  $unzipper->prepareExtraction($archive, $destination);
+  $exclude_leading_dir = isset($_POST['exclude_leading_dir']) ? true : false;
+  $unzipper->prepareExtraction($archive, $destination, $exclude_leading_dir);
 }
 
 if (isset($_POST['dozip'])) {
@@ -495,6 +496,9 @@ class Zipper {
     <label for="extpath">Extraction path (optional):</label>
     <input type="text" name="extpath" class="form-field" />
     <p class="info">Enter extraction path without leading or trailing slashes (e.g. "mypath"). If left empty current directory will be used.</p>
+    <label for="exclude_leading_dir">Do not include leading directory:</label>
+    <input type="checkbox" name="exclude_leading_dir" />
+    <p class="info">For archives made of only one single directory containing all files and folders. Check this checkbox to extract archive without including this single directory.</p>
     <input type="submit" name="dounzip" class="submit" value="Unzip Archive"/>
   </fieldset>
 
