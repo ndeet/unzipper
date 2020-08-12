@@ -239,6 +239,36 @@ class Unzipper {
     return $tmp_dir;
   }
 
+  /**
+   * Move all files and folders from one directory to another, but if source directory only contains a lonely folder it will be excluded.
+   *
+   * @param string $source
+   *   All files and folders will be moved from this directory.
+   * @param string $destination
+   *   All files and folders will be moved to this directory.
+   */
+  private static function moveFilesExcludingLeadingDir($source, $destination) {
+    $dir_content = array_values(array_diff(scandir($source), ['.', '..']));
+
+    // Check if source directory only contains a single folder
+    if (count($dir_content) == 1 && is_dir($source.'/'.$dir_content[0])) {
+      $from_dir = $source.'/'.$dir_content[0];
+      $dir_content = array_values(array_diff(scandir($from_dir), ['.', '..']));
+    }
+    else {
+      $from_dir = $source;
+    }
+
+    // Move all files and folders
+    foreach($dir_content as $item) {
+      rename($from_dir.'/'.$item, $destination.'/'.$item);
+    }
+
+    if ($from_dir != $source) {
+      rmdir($from_dir);
+    }
+  }
+
 }
 
 /**
