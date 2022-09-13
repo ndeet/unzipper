@@ -57,7 +57,7 @@ class Unzipper {
         $GLOBALS['status'] = array('info' => '.zip or .gz or .rar files found, ready for extraction');
       }
       else {
-        $GLOBALS['status'] = array('info' => 'No .zip or .gz or rar files found. So only zipping functionality available.');
+        $GLOBALS['status'] = array('info' => 'No .zip or .gz or .rar files found. So only zipping functionality available.');
       }
     }
   }
