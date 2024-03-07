@@ -6,7 +6,7 @@ As of version 0.1.0 it also supports creating archives.
 It's handy if you do not have shell access. E.g. if you want to upload a lot of files (php framework or image collection) as archive - because it is much faster than uploading each file by itself.
 
 
-## Requirements    
+## Requirements
 PHP 5.3 and newer
 (If you still run PHP < 5.6 you should consider updating PHP. These old PHP versions do not get any security updates and your site may be vulnerable.)
 
@@ -24,6 +24,11 @@ PHP 5.3 and newer
 * (Optional) Set path to zip, defaults to current directory
 * Click "Zip Archive"
 
+### Multipart zipper
+* Choose .001 files that you want to zip.
+* Files will only display if the uploaded split files is created in 7zip
+* Click "Multipart Zip"
+
 ## Version
 Beta version state, use at you own risk.
 
@@ -32,13 +37,13 @@ Beta version state, use at you own risk.
 Released under GNU/GPL v3
 
 
-## Screenshot   
+## Screenshot
 ![Screenshot of unzipper](https://cloud.githubusercontent.com/assets/1136761/17080297/1bccbd60-512a-11e6-89cb-c6c112270154.png)
 
 
-## Updates    
+## Updates
 Get latest code at https://github.com/ndeet/unzipper
 
 
-## Credits   
-[See contributors on Github](https://github.com/ndeet/unzipper/graphs/contributors)  
+## Credits
+[See contributors on Github](https://github.com/ndeet/unzipper/graphs/contributors)
