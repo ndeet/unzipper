@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The Unzipper extracts .zip or .rar archives and .gz files on webservers.
  * It's handy if you do not have shell access. E.g. if you want to upload a lot
@@ -10,12 +11,13 @@
  * @package attec.toolbox
  * @version 0.1.1
  */
-define('VERSION', '0.1.1');
+define('VERSION', '0.1.2');
 
 $timestart = microtime(TRUE);
 $GLOBALS['status'] = array();
 
 $unzipper = new Unzipper;
+
 if (isset($_POST['dounzip'])) {
   // Check if an archive was selected for unzipping.
   $archive = isset($_POST['zipfile']) ? strip_tags($_POST['zipfile']) : '';
@@ -30,23 +32,37 @@ if (isset($_POST['dozip'])) {
   Zipper::zipDir($zippath, $zipfile);
 }
 
+if (isset($_POST['multipart'])) {
+  $splitfile = !empty($_POST['splitfile']) ? strip_tags($_POST['splitfile'])  : '';
+  // Replace the .001 of the multipart file to become the main zip file
+  $splitfileName = str_replace('.zip.001', '', $splitfile);
+  // Resulting zipfile e.g. project--2016-07-23--11-55.zip.
+  $zipfile = $splitfileName. '--' . date("Y-m-d--H-i") . '.zip';
+  Zipper::multipartZipped($splitfile, $zipfile);
+}
+
 $timeend = microtime(TRUE);
 $time = round($timeend - $timestart, 4);
 
 /**
  * Class Unzipper
  */
-class Unzipper {
+class Unzipper
+{
   public $localdir = '.';
   public $zipfiles = array();
 
-  public function __construct() {
-    // Read directory and pick .zip, .rar and .gz files.
+  public function __construct()
+  {
+
+    // Read directory and pick .zip, .rar, .gz and multipart (.001~) files.
     if ($dh = opendir($this->localdir)) {
       while (($file = readdir($dh)) !== FALSE) {
-        if (pathinfo($file, PATHINFO_EXTENSION) === 'zip'
+        if (
+          pathinfo($file, PATHINFO_EXTENSION) === 'zip'
           || pathinfo($file, PATHINFO_EXTENSION) === 'gz'
           || pathinfo($file, PATHINFO_EXTENSION) === 'rar'
+          || pathinfo($file, PATHINFO_EXTENSION) === '001'
         ) {
           $this->zipfiles[] = $file;
         }
@@ -55,11 +71,12 @@ class Unzipper {
 
       if (!empty($this->zipfiles)) {
         $GLOBALS['status'] = array('info' => '.zip or .gz or .rar files found, ready for extraction');
-      }
-      else {
+      } else {
         $GLOBALS['status'] = array('info' => 'No .zip or .gz or rar files found. So only zipping functionality available.');
       }
     }
+
+
   }
 
   /**
@@ -70,12 +87,12 @@ class Unzipper {
    * @param string $destination
    *   The relative destination path where to extract files.
    */
-  public function prepareExtraction($archive, $destination = '') {
+  public function prepareExtraction($archive, $destination = '')
+  {
     // Determine paths.
     if (empty($destination)) {
       $extpath = $this->localdir;
-    }
-    else {
+    } else {
       $extpath = $this->localdir . '/' . $destination;
       // Todo: move this to extraction function.
       if (!is_dir($extpath)) {
@@ -96,7 +113,8 @@ class Unzipper {
    * @param string $destination
    *   The relative destination path where to extract files.
    */
-  public static function extract($archive, $destination) {
+  public static function extract($archive, $destination)
+  {
     $ext = pathinfo($archive, PATHINFO_EXTENSION);
     switch ($ext) {
       case 'zip':
@@ -109,7 +127,6 @@ class Unzipper {
         self::extractRarArchive($archive, $destination);
         break;
     }
-
   }
 
   /**
@@ -118,7 +135,8 @@ class Unzipper {
    * @param $archive
    * @param $destination
    */
-  public static function extractZipArchive($archive, $destination) {
+  public static function extractZipArchive($archive, $destination)
+  {
     // Check if webserver supports unzipping.
     if (!class_exists('ZipArchive')) {
       $GLOBALS['status'] = array('error' => 'Error: Your PHP version does not support unzip functionality.');
@@ -134,12 +152,10 @@ class Unzipper {
         $zip->extractTo($destination);
         $zip->close();
         $GLOBALS['status'] = array('success' => 'Files unzipped successfully');
-      }
-      else {
+      } else {
         $GLOBALS['status'] = array('error' => 'Error: Directory not writeable by webserver.');
       }
-    }
-    else {
+    } else {
       $GLOBALS['status'] = array('error' => 'Error: Cannot read .zip archive.');
     }
   }
@@ -152,7 +168,8 @@ class Unzipper {
    * @param string $destination
    *   The relative destination path where to extract files.
    */
-  public static function extractGzipFile($archive, $destination) {
+  public static function extractGzipFile($archive, $destination)
+  {
     // Check if zlib is enabled
     if (!function_exists('gzopen')) {
       $GLOBALS['status'] = array('error' => 'Error: Your PHP has no zlib support enabled.');
@@ -182,11 +199,9 @@ class Unzipper {
           unlink($destination . '/' . $filename);
         }
       }
-    }
-    else {
+    } else {
       $GLOBALS['status'] = array('error' => 'Error unzipping file.');
     }
-
   }
 
   /**
@@ -197,7 +212,8 @@ class Unzipper {
    * @param string $destination
    *   The relative destination path where to extract files.
    */
-  public static function extractRarArchive($archive, $destination) {
+  public static function extractRarArchive($archive, $destination)
+  {
     // Check if webserver supports unzipping.
     if (!class_exists('RarArchive')) {
       $GLOBALS['status'] = array('error' => 'Error: Your PHP version does not support .rar archive functionality. <a class="info" href="http://php.net/manual/en/rar.installation.php" target="_blank">How to install RarArchive</a>');
@@ -213,16 +229,13 @@ class Unzipper {
         }
         $rar->close();
         $GLOBALS['status'] = array('success' => 'Files extracted successfully.');
-      }
-      else {
+      } else {
         $GLOBALS['status'] = array('error' => 'Error: Directory not writeable by webserver.');
       }
-    }
-    else {
+    } else {
       $GLOBALS['status'] = array('error' => 'Error: Cannot read .rar archive.');
     }
   }
-
 }
 
 /**
@@ -231,7 +244,8 @@ class Unzipper {
  * Copied and slightly modified from http://at2.php.net/manual/en/class.ziparchive.php#110719
  * @author umbalaconmeogia
  */
-class Zipper {
+class Zipper
+{
   /**
    * Add files and sub-directories in a folder to zip file.
    *
@@ -244,7 +258,8 @@ class Zipper {
    * @param int $exclusiveLength
    *   Number of text to be exclusived from the file path.
    */
-  private static function folderToZip($folder, &$zipFile, $exclusiveLength) {
+  private static function folderToZip($folder, &$zipFile, $exclusiveLength)
+  {
     $handle = opendir($folder);
 
     while (FALSE !== $f = readdir($handle)) {
@@ -256,8 +271,7 @@ class Zipper {
 
         if (is_file($filePath)) {
           $zipFile->addFile($filePath, $localPath);
-        }
-        elseif (is_dir($filePath)) {
+        } elseif (is_dir($filePath)) {
           // Add sub-directory.
           $zipFile->addEmptyDir($localPath);
           self::folderToZip($filePath, $zipFile, $exclusiveLength);
@@ -279,7 +293,8 @@ class Zipper {
    * @param string $outZipPath
    *   Relative path of the resulting output zip file.
    */
-  public static function zipDir($sourcePath, $outZipPath) {
+  public static function zipDir($sourcePath, $outZipPath)
+  {
     $pathInfo = pathinfo($sourcePath);
     $parentPath = $pathInfo['dirname'];
     $dirName = $pathInfo['basename'];
@@ -289,24 +304,60 @@ class Zipper {
     $z->addEmptyDir($dirName);
     if ($sourcePath == $dirName) {
       self::folderToZip($sourcePath, $z, 0);
-    }
-    else {
+    } else {
       self::folderToZip($sourcePath, $z, strlen("$parentPath/"));
     }
     $z->close();
 
     $GLOBALS['status'] = array('success' => 'Successfully created archive ' . $outZipPath);
   }
+
+
+  public static function multipartZipped($splitfile, $zipfile)
+  {
+    $localdir = '.';
+
+    if(!$splitfile) {
+        $GLOBALS['status'] = array('error' => 'No split files exists.');
+        return;
+    }
+
+    if ($dh = opendir($localdir)) {
+      // Removed the 1 in the first split file
+      $splitfileRemoveOne = str_replace('1', '', $splitfile);
+
+      // Remove the existing zip file
+      if(file_exists($zipfile)) {
+        $GLOBALS['status'] = array('error' => 'File already exists old file will be overwritten.');
+        unlink($zipfile);
+      } else {
+        $GLOBALS['status'] = array('success' => 'Multipart files merged. Extract it using Archive Unzipper below');
+      }
+      // Join multipart files
+      while (($file = readdir($dh)) !== FALSE) {
+        // Check for split files that contains .zip.00
+        if (str_contains($file, $splitfileRemoveOne) &&
+            file_exists($file)
+        ) {
+          // Get the content of the file
+          $content = file_get_contents($file);
+          // Combine multipart files into one
+          file_put_contents($zipfile, $content, FILE_APPEND);
+        }
+      }
+      closedir($dh);
+    }
+  }
 }
 ?>
 
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>File Unzipper + Zipper</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <style type="text/css">
-    <!--
     body {
       font-family: Arial, sans-serif;
       line-height: 150%;
@@ -385,38 +436,61 @@ class Zipper {
       background-color: #2c6db2;
       cursor: pointer;
     }
-    -->
   </style>
 </head>
-<body>
-<p class="status status--<?php echo strtoupper(key($GLOBALS['status'])); ?>">
-  Status: <?php echo reset($GLOBALS['status']); ?><br/>
-  <span class="small">Processing Time: <?php echo $time; ?> seconds</span>
-</p>
-<form action="" method="POST">
-  <fieldset>
-    <h1>Archive Unzipper</h1>
-    <label for="zipfile">Select .zip or .rar archive or .gz file you want to extract:</label>
-    <select name="zipfile" size="1" class="select">
-      <?php foreach ($unzipper->zipfiles as $zip) {
-        echo "<option>$zip</option>";
-      }
-      ?>
-    </select>
-    <label for="extpath">Extraction path (optional):</label>
-    <input type="text" name="extpath" class="form-field" />
-    <p class="info">Enter extraction path without leading or trailing slashes (e.g. "mypath"). If left empty current directory will be used.</p>
-    <input type="submit" name="dounzip" class="submit" value="Unzip Archive"/>
-  </fieldset>
 
-  <fieldset>
-    <h1>Archive Zipper</h1>
-    <label for="zippath">Path that should be zipped (optional):</label>
-    <input type="text" name="zippath" class="form-field" />
-    <p class="info">Enter path to be zipped without leading or trailing slashes (e.g. "zippath"). If left empty current directory will be used.</p>
-    <input type="submit" name="dozip" class="submit" value="Zip Archive"/>
-  </fieldset>
-</form>
-<p class="version">Unzipper version: <?php echo VERSION; ?></p>
+<body>
+  <p class="status status--<?php echo strtoupper(key($GLOBALS['status'])); ?>">
+    Status: <?php echo reset($GLOBALS['status']); ?><br />
+    <span class="small">Processing Time: <?php echo $time; ?> seconds</span>
+  </p>
+
+  <form action="" method="POST">
+    <fieldset>
+      <h1>Archive Unzipper</h1>
+      <label for="zipfile">Select .zip or .rar archive or .gz file you want to extract:</label>
+      <select name="zipfile" size="1" class="select">
+        <?php foreach ($unzipper->zipfiles as $zip) {
+          if(!str_contains($zip, '.00'))
+            echo "<option>$zip</option>";
+          }
+        ?>
+      </select>
+      <label for="extpath">Extraction path (optional):</label>
+      <input type="text" name="extpath" class="form-field" />
+      <p class="info">Enter extraction path without leading or trailing slashes (e.g. "mypath"). If left empty current directory will be used.</p>
+      <input type="submit" name="dounzip" class="submit" value="Unzip Archive" />
+    </fieldset>
+
+    <fieldset>
+      <h1>Archive Zipper</h1>
+      <label for="zippath">Path that should be zipped (optional):</label>
+      <input type="text" name="zippath" class="form-field" />
+      <p class="info">Enter path to be zipped without leading or trailing slashes (e.g. "zippath"). If left empty current directory will be used.</p>
+      <input type="submit" name="dozip" class="submit" value="Zip Archive" />
+    </fieldset>
+  </form>
+
+  <form action="" method="POST">
+    <fieldset>
+        <h1>Multipart Zipper</h1>
+          <div>
+            <label for="splitfile">Select split files that you want to be zipped</label>
+            <select name="splitfile" size="1" class="select">
+                <?php foreach ($unzipper->zipfiles as $zip) {
+                if(str_contains($zip, '.00'))
+                echo "<option>$zip</option>";
+                }
+                ?>
+            </select>
+          </div>
+          <p class="info">This multipart zipper will only work on files that has been split by 7zip. Reload after the zip</p>
+          <input type="submit" name="multipart" value="Zip Multipart" class="submit">
+          </input>
+    </fieldset>
+
+  </form>
+  <p class="version">Unzipper version: <?php echo VERSION; ?></p>
 </body>
+
 </html>
